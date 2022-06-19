@@ -1,0 +1,14 @@
+name: 'Flattern Markdown files folder structure'
+description: "GitHub action to flattern file structure with markdown data"
+branding:
+  icon: file-text
+  color: orange
+
+inputs:
+  path:
+    description: Folder to make flat
+    required: true
+
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

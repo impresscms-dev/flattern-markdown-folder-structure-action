@@ -1,0 +1,48 @@
+{
+  "name": "flattern-markdown-folder-structure-action",
+  "version": "0.0.0",
+  "description": "GitHub action to flattern file structure with markdown data",
+  "main": "src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:impresscms-dev/flattern-markdown-folder-structure-action.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts",
+    "lint": "eslint src/**/*.ts",
+    "pack": "ncc build --minify",
+    "all": "npm install && npm run build && npm run format && npm run lint && npm run pack",
+    "fast-all": "npm install && npm run build && npm run pack"
+  },
+  "keywords": [
+    "github actions",
+    "markdown",
+    "flattern",
+    "files",
+    "directories",
+    "folders"
+  ],
+  "author": "Raimondas Rimkevičius (aka MekDrop)",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.8.2",
+    "@actions/github": "^5.0.3",
+    "recursive-readdir-sync": "^1.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.42",
+    "@typescript-eslint/eslint-plugin": "^5.27.1",
+    "@typescript-eslint/parser": "^5.0.0",
+    "@vercel/ncc": "^0.34.0",
+    "eslint": "^8.0.1",
+    "eslint-plugin-github": "^4.3.2",
+    "eslint-plugin-jest": "^26.5.3",
+    "jest": "^28.1.1",
+    "prettier": "^2.6.2",
+    "semver": "^7.3.7",
+    "typescript": "^4.7.3"
+  }
+}
