@@ -1,7 +1,7 @@
 [![License](https://img.shields.io/github/license/impresscms-dev/flattern-markdown-folder-structure-action.svg)](LICENSE)
 [![GitHub release](https://img.shields.io/github/release/impresscms-dev/flattern-markdown-folder-structure-action.svg)](https://github.com/impresscms-dev/generate-php-project-classes-list-file-action/releases)
 
-# Flatter MarkDown folder structure
+# Flattern MarkDown folder structure
 
 GitHub action to flattern file structure with [MarkDown](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax) data.
 
