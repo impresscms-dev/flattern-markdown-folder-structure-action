@@ -44,6 +44,12 @@ jobs:
       - name: Pack
         run: npm run pack
 
+      - name: Uploading build artifact...
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: dist/*.js
+
   commit_and_push:
 
     runs-on: ubuntu-latest
@@ -51,7 +57,18 @@ jobs:
     needs: build
 
     steps:
-      -
+      - name: Checkouting code...
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Downloading build artifact....
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: dist/
+          
+      - name: Auto commiting changes...
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Automatically builded and updated
