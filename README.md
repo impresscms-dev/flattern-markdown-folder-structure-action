@@ -41,7 +41,7 @@ jobs:
           output_path: ./docs/
           
       - name: Flattering documentation...
-        uses: impresscms-dev/flattern-markdown-folder-structure-action@v0.2
+        uses: impresscms-dev/flattern-markdown-folder-structure-action@v0.2.2
         with:
           path: ./docs/
           
