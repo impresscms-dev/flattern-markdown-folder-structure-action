@@ -1,10 +1,10 @@
 import {getInput} from '@actions/core'
 import FileStructureFlatterer from './helpers/FileStructureFlatterer'
-import {realpathSync} from "fs"
+import fs from "fs"
 
-const flatterer = new FileStructureFlatterer()
+const flatterer = new FileStructureFlatterer(fs)
 flatterer.exec(
-  realpathSync(
+  fs.realpathSync(
     getInput('path', {required: true})
   )
 )
