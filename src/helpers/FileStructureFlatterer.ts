@@ -1,10 +1,14 @@
-import {debug} from '@actions/core'
-import {readFileSync, renameSync, writeFileSync} from 'fs'
-import {basename, dirname, extname} from 'path'
+import {debug, isDebug} from '@actions/core'
+import {basename, extname} from 'path'
 import Execution from '../helpers/Execution'
-import readDirSync from 'recursive-readdir-sync'
+import UnsupportedFilesystemItemError from '../errors/UnsupportedFilesystemItemError'
 
 export default class FileStructureFlatterer {
+  #fs: any
+
+  constructor(fs: any) {
+    this.#fs = fs
+  }
 
   /**
    * @inheritDoc
@@ -24,6 +28,41 @@ export default class FileStructureFlatterer {
         flippedFilenames
       )
     }
+  }
+
+  /**
+   * Returns all files recusrively in path
+   *
+   * @param {string} path Path where to look for
+   */
+  protected readDirSync(path: string): string[] {
+    const files = []
+    const dirs = ['.']
+    while (dirs.length > 0) {
+      const dir = dirs.pop()
+      const contents = this.#fs.readdirSync(`${path}/${dir}`)
+
+      for (const item of contents) {
+        const relativePath = `${dir}/${item.toString()}`
+        const fullPath = `${path}/${relativePath}`
+        const info = this.#fs.lstatSync(fullPath)
+        if (info.isDirectory()) {
+          dirs.push(relativePath)
+          continue
+        }
+
+        if (info.isFile()) {
+          files.push(
+            relativePath.substring(2)
+          )
+          continue
+        }
+
+        throw new UnsupportedFilesystemItemError(relativePath)
+      }
+    }
+
+    return files
   }
 
   /**
@@ -65,8 +104,10 @@ export default class FileStructureFlatterer {
     filename: string,
     filenames: {[x: string]: string}
   ): void {
-    debug(` Fixing ${filename}...`)
-    const content = readFileSync(filename, 'utf8')
+    if (isDebug()) {
+      debug(` Fixing ${filename}...`)
+    }
+    const content = this.#fs.readFileSync(filename, 'utf8')
     const allPossibleFilenames: {[x: string]: string} = {}
     for (const oldFilename in filenames) {
       const currentFilename = filenames[oldFilename]
@@ -105,8 +146,10 @@ export default class FileStructureFlatterer {
       }
     )
     if (newContent !== content) {
-      debug('  Changed.')
-      writeFileSync(filename, newContent)
+      if (isDebug()) {
+        debug('  Changed.')
+      }
+      this.#fs.writeFileSync(filename, newContent)
     }
   }
 
@@ -133,10 +176,9 @@ export default class FileStructureFlatterer {
   private getAllFilesInfo(
     cwd: string
   ): {filename: string; shortPath: string}[] {
-    return readDirSync(cwd).map((file: string) => {
+    return this.readDirSync(cwd).map((file: string) => {
       const shortFilename = basename(file)
-      const pathWithoutFilename = dirname(file)
-      const pathPrefix = pathWithoutFilename.substring(cwd.length)
+      const pathPrefix = file.substring(0, file.length - shortFilename.length - 1)
       return {
         filename: shortFilename,
         shortPath: pathPrefix
@@ -156,8 +198,10 @@ export default class FileStructureFlatterer {
     oldFilename: string,
     newFilename: string
   ): void {
-    debug(` Renaming ${oldFilename} -> ${newFilename}...`)
-    renameSync(
+    if (isDebug()) {
+      debug(` Renaming ${oldFilename} -> ${newFilename}...`)
+    }
+    this.#fs.renameSync(
       newDocs.concat('/', oldFilename),
       newDocs.concat('/', newFilename)
     )
