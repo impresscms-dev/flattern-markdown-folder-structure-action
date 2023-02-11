@@ -1,5 +1,5 @@
-import {debug} from '@actions/core'
-import {basename, dirname, extname} from 'path'
+import {debug, isDebug} from '@actions/core'
+import {basename, extname} from 'path'
 import Execution from '../helpers/Execution'
 import UnsupportedFilesystemItemError from '../errors/UnsupportedFilesystemItemError'
 
@@ -7,7 +7,7 @@ export default class FileStructureFlatterer {
   #fs: any
 
   constructor(fs: any) {
-    this.#fs = fs;
+    this.#fs = fs
   }
 
   /**
@@ -36,35 +36,33 @@ export default class FileStructureFlatterer {
    * @param {string} path Path where to look for
    */
   protected readDirSync(path: string): string[] {
-    let files = [];
-    let dirs = ['.'];
-    let dir: string|undefined;
-    while (dir = dirs.pop()) {
-      let contents = this.#fs.readdirSync(path + '/' + dir);
+    const files = []
+    const dirs = ['.']
+    while (dirs.length > 0) {
+      const dir = dirs.pop()
+      const contents = this.#fs.readdirSync(`${path}/${dir}`)
 
-      for (let i = 0; i < contents.length; i++) {
-        const item: string = contents[i];
-
-        let relativePath = dir + '/' + item.toString();
-        let fullPath = path + '/' + relativePath;
-        let info = this.#fs.lstatSync(fullPath);
+      for (const item of contents) {
+        const relativePath = `${dir}/${item.toString()}`
+        const fullPath = `${path}/${relativePath}`
+        const info = this.#fs.lstatSync(fullPath)
         if (info.isDirectory()) {
-          dirs.push(relativePath);
-          continue;
+          dirs.push(relativePath)
+          continue
         }
 
         if (info.isFile()) {
           files.push(
             relativePath.substring(2)
-          );
-          continue;
+          )
+          continue
         }
 
-        throw new UnsupportedFilesystemItemError(relativePath);
+        throw new UnsupportedFilesystemItemError(relativePath)
       }
     }
 
-    return files;
+    return files
   }
 
   /**
@@ -106,7 +104,9 @@ export default class FileStructureFlatterer {
     filename: string,
     filenames: {[x: string]: string}
   ): void {
-    debug(` Fixing ${filename}...`)
+    if (isDebug()) {
+      debug(` Fixing ${filename}...`)
+    }
     const content = this.#fs.readFileSync(filename, 'utf8')
     const allPossibleFilenames: {[x: string]: string} = {}
     for (const oldFilename in filenames) {
@@ -146,7 +146,9 @@ export default class FileStructureFlatterer {
       }
     )
     if (newContent !== content) {
-      debug('  Changed.')
+      if (isDebug()) {
+        debug('  Changed.')
+      }
       this.#fs.writeFileSync(filename, newContent)
     }
   }
@@ -176,8 +178,7 @@ export default class FileStructureFlatterer {
   ): {filename: string; shortPath: string}[] {
     return this.readDirSync(cwd).map((file: string) => {
       const shortFilename = basename(file)
-      const pathWithoutFilename = dirname(file)
-      const pathPrefix = pathWithoutFilename.substring(cwd.length)
+      const pathPrefix = file.substring(0, file.length - shortFilename.length - 1)
       return {
         filename: shortFilename,
         shortPath: pathPrefix
@@ -197,7 +198,9 @@ export default class FileStructureFlatterer {
     oldFilename: string,
     newFilename: string
   ): void {
-    debug(` Renaming ${oldFilename} -> ${newFilename}...`)
+    if (isDebug()) {
+      debug(` Renaming ${oldFilename} -> ${newFilename}...`)
+    }
     this.#fs.renameSync(
       newDocs.concat('/', oldFilename),
       newDocs.concat('/', newFilename)
