@@ -1,19 +1,24 @@
 import {debug, isDebug} from '@actions/core'
 import {basename, extname} from 'path'
-import Execution from '../helpers/Execution'
-import UnsupportedFilesystemItemError from '../errors/UnsupportedFilesystemItemError'
+import Execution from '../helpers/Execution.js'
+import UnsupportedFilesystemItemError from '../errors/UnsupportedFilesystemItemError.js'
 
+/**
+ * Class to flatten file structure with markdown data
+ */
 export default class FileStructureFlatterer {
-  #fs: any
-
-  constructor(fs: any) {
-    this.#fs = fs
+  /**
+   * @param {object} fs - Filesystem module
+   */
+  constructor(fs) {
+    this._fs = fs
   }
 
   /**
-   * @inheritDoc
+   * Execute the flattening process
+   * @param {string} path - Path to flatten
    */
-  exec(path: string): void {
+  exec(path) {
     const filenames = this.generateNewStructData(path)
     const flippedFilenames = this.flipKeysWithValues(filenames)
     for (const newFilename in filenames) {
@@ -31,21 +36,22 @@ export default class FileStructureFlatterer {
   }
 
   /**
-   * Returns all files recusrively in path
+   * Returns all files recursively in path
    *
-   * @param {string} path Path where to look for
+   * @param {string} path - Path where to look for
+   * @return {string[]} List of files
    */
-  protected readDirSync(path: string): string[] {
+  readDirSync(path) {
     const files = []
     const dirs = ['.']
     while (dirs.length > 0) {
       const dir = dirs.pop()
-      const contents = this.#fs.readdirSync(`${path}/${dir}`)
+      const contents = this._fs.readdirSync(`${path}/${dir}`)
 
       for (const item of contents) {
         const relativePath = `${dir}/${item.toString()}`
         const fullPath = `${path}/${relativePath}`
-        const info = this.#fs.lstatSync(fullPath)
+        const info = this._fs.lstatSync(fullPath)
         if (info.isDirectory()) {
           dirs.push(relativePath)
           continue
@@ -68,10 +74,11 @@ export default class FileStructureFlatterer {
   /**
    * Generate filenames data for new files structure
    *
-   * @param {string} cwd Docs path
+   * @param {string} cwd - Docs path
+   * @return {object} Mapping of new filenames to old filenames
    */
-  protected generateNewStructData(cwd: string): {[x: string]: string} {
-    const newStructData: {[x: string]: string} = {}
+  generateNewStructData(cwd) {
+    const newStructData = {}
     const files = this.getAllFilesInfo(cwd)
     for (const fileInfo of this.filterFileInfoByShortPath(files, false)) {
       newStructData[fileInfo.filename] = fileInfo.filename
@@ -97,18 +104,15 @@ export default class FileStructureFlatterer {
   /**
    * Fixes links to new style
    *
-   * @param {string} filename Filename where to fix links
-   * @param {object} filenames Filenames data to fix
+   * @param {string} filename - Filename where to fix links
+   * @param {object} filenames - Filenames data to fix
    */
-  protected fixesToNewStyleLinks(
-    filename: string,
-    filenames: {[x: string]: string}
-  ): void {
+  fixesToNewStyleLinks(filename, filenames) {
     if (isDebug()) {
       debug(` Fixing ${filename}...`)
     }
-    const content = this.#fs.readFileSync(filename, 'utf8')
-    const allPossibleFilenames: {[x: string]: string} = {}
+    const content = this._fs.readFileSync(filename, 'utf8')
+    const allPossibleFilenames = {}
     for (const oldFilename in filenames) {
       const currentFilename = filenames[oldFilename]
       allPossibleFilenames[oldFilename] = currentFilename
@@ -132,9 +136,10 @@ export default class FileStructureFlatterer {
           ] = currentFilename
       }
     }
+    // noinspection RegExpRedundantEscape
     const newContent = content.replace(
       /\[([^\]]+)]\(([^\)]+)\)/gm,
-      (fullMsg: string, name: string, link: string) => {
+      (fullMsg, name, link) => {
         if (typeof allPossibleFilenames[link] !== 'undefined') {
           const jstr = allPossibleFilenames[link]
             .split('.')
@@ -149,19 +154,18 @@ export default class FileStructureFlatterer {
       if (isDebug()) {
         debug('  Changed.')
       }
-      this.#fs.writeFileSync(filename, newContent)
+      this._fs.writeFileSync(filename, newContent)
     }
   }
 
   /**
    * Flip keys with values for object
    *
-   * @param {object} obj Object to flip
+   * @param {object} obj - Object to flip
+   * @return {object} Flipped object
    */
-  protected flipKeysWithValues(obj: {
-    [x: string]: string
-  }): {[x: string]: string} {
-    const ret: {[x: string]: string} = {}
+  flipKeysWithValues(obj) {
+    const ret = {}
     for (const x in obj) {
       ret[obj[x]] = x
     }
@@ -171,12 +175,11 @@ export default class FileStructureFlatterer {
   /**
    * Gets all files info in path
    *
-   * @param {string} cwd Path where to get files info
+   * @param {string} cwd - Path where to get files info
+   * @return {Array<{filename: string, shortPath: string}>} Array of file info objects
    */
-  private getAllFilesInfo(
-    cwd: string
-  ): {filename: string; shortPath: string}[] {
-    return this.readDirSync(cwd).map((file: string) => {
+  getAllFilesInfo(cwd) {
+    return this.readDirSync(cwd).map((file) => {
       const shortFilename = basename(file)
       const pathPrefix = file.substring(0, file.length - shortFilename.length - 1)
       return {
@@ -189,19 +192,15 @@ export default class FileStructureFlatterer {
   /**
    * Renames file
    *
-   * @param {string} newDocs New docs
-   * @param {string} oldFilename Old filename
-   * @param {string} newFilename New filename
+   * @param {string} newDocs - New docs
+   * @param {string} oldFilename - Old filename
+   * @param {string} newFilename - New filename
    */
-  protected renameFile(
-    newDocs: string,
-    oldFilename: string,
-    newFilename: string
-  ): void {
+  renameFile(newDocs, oldFilename, newFilename) {
     if (isDebug()) {
       debug(` Renaming ${oldFilename} -> ${newFilename}...`)
     }
-    this.#fs.renameSync(
+    this._fs.renameSync(
       newDocs.concat('/', oldFilename),
       newDocs.concat('/', newFilename)
     )
@@ -210,14 +209,12 @@ export default class FileStructureFlatterer {
   /**
    * Filters file infos by short path
    *
-   * @param {object[]} files Files to filter
-   * @param {boolean} withShortPath Should have anything in short path
+   * @param {Array<{filename: string, shortPath: string}>} files - Files to filter
+   * @param {boolean} withShortPath - Should have anything in short path
+   * @return {Array<{filename: string, shortPath: string}>} Filtered files
    */
-  private filterFileInfoByShortPath(
-    files: {filename: string; shortPath: string}[],
-    withShortPath: boolean
-  ): {filename: string; shortPath: string}[] {
-    return files.filter((fileInfo: {filename: string; shortPath: string}) => {
+  filterFileInfoByShortPath(files, withShortPath) {
+    return files.filter((fileInfo) => {
       return withShortPath
         ? fileInfo.shortPath !== ''
         : fileInfo.shortPath === ''
@@ -227,12 +224,10 @@ export default class FileStructureFlatterer {
   /**
    * Generates alternative filename
    *
-   * @param {object} fileInfo Fileinfo from where to generate new filename
+   * @param {{filename: string, shortPath: string}} fileInfo - Fileinfo from where to generate new filename
+   * @return {string} Alternative filename
    */
-  private generateAltFilename(fileInfo: {
-    filename: string
-    shortPath: string
-  }): string {
+  generateAltFilename(fileInfo) {
     const filenameWithoutExt = fileInfo.filename
       .split('.')
       .slice(0, -1)
