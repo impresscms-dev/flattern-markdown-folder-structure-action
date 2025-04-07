@@ -48,9 +48,6 @@ jobs:
       - name: NPM install
         run: npm install
 
-      - name: NPM build
-        run: npm run build
-
       - name: NPM format
         run: npm run format
 
