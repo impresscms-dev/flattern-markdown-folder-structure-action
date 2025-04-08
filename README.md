@@ -1,65 +1,105 @@
 [![License](https://img.shields.io/github/license/impresscms-dev/flattern-markdown-folder-structure-action.svg)](LICENSE)
-[![GitHub release](https://img.shields.io/github/release/impresscms-dev/flattern-markdown-folder-structure-action.svg)](https://github.com/impresscms-dev/generate-php-project-classes-list-file-action/releases)
+[![GitHub release](https://img.shields.io/github/release/impresscms-dev/flattern-markdown-folder-structure-action.svg)](https://github.com/impresscms-dev/flattern-markdown-folder-structure-action/releases)
 
-# Flattern MarkDown folder structure
+# Flattern Markdown Folder Structure
 
-GitHub action to flattern file structure with [MarkDown](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax) data.
+A GitHub Action that flattens a directory structure containing Markdown files while preserving and updating internal links between documents.
+
+## What This Action Does
+
+This action:
+
+1. Takes a directory containing Markdown files in a nested folder structure
+2. Moves all files to the root of that directory
+3. Renames files to avoid naming conflicts (adding folder path in parentheses when needed)
+4. Updates all internal links between documents to maintain proper references
+
+This is particularly useful for documentation generation workflows where you want a flat structure for publishing or deployment.
 
 ## Usage
 
-To use this action in your project, create workflow in your project similar to this code (Note: some parts and arguments needs to be altered):
+To use this action in your project, create a workflow in your GitHub repository similar to this example (customize as needed):
 ```yaml
-name: Generate documentation
+name: Generate and Flatten Documentation
 
 on:
   push:
+    branches: [main, master]
 
 jobs:
-  get_php_classes_list:
+  flatten_docs:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkouting project code...
-        uses: actions/checkout@v2
-        
-      - name: Install PHP
-        uses: shivammathur/setup-php@master
-        with:
-          php-version: 8.1
-          extensions: curl, gd, pdo_mysql, json, mbstring, pcre, session
-          ini-values: post_max_size=256M
-          coverage: none
-          tools: composer:v2
-          
-      - name: Install Composer dependencies (with dev)
-        run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader       
-          
-      - name: Generating documentation...
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Generate documentation (example using PHP docs generator)
+      - name: Generate documentation
         uses: impresscms-dev/generate-phpdocs-with-clean-phpdoc-md-action@v0.1.4
         with:
-          class_root_namespace: ImpressCMS\
-          included_classes: ImpressCMS\**
+          class_root_namespace: YourNamespace\
+          included_classes: YourNamespace\**
           output_path: ./docs/
-          
-      - name: Flattering documentation...
-        uses: impresscms-dev/flattern-markdown-folder-structure-action@v0.2.2
+
+      # Flatten the documentation structure
+      - name: Flatten documentation structure
+        uses: impresscms-dev/flattern-markdown-folder-structure-action@v2
         with:
           path: ./docs/
-          
-      - uses: actions/upload-artifact@v3
+
+      # Optional: Upload the flattened docs as an artifact
+      - name: Upload documentation
+        uses: actions/upload-artifact@v4
         with:
-          name: my-artifact
+          name: documentation
           path: ./docs/
 ```
 
 ## Arguments
 
-This action supports such arguments (used in `with` keyword):
-| Argument    | Required | Default value        | Description                       |
-|-------------|----------|----------------------|-----------------------------------|
-| path | Yes      |                      | Folder to flattern |
+This action supports the following arguments (used with the `with` keyword):
 
-## How to contribute?
+| Argument | Required | Default value | Description |
+|----------|----------|---------------|-------------|
+| path     | Yes      | -             | Path to the folder containing Markdown files that should be flattened |
 
-If you want to add some functionality or fix bugs, you can fork, change and create pull request. If you not sure how this works, try [interactive GitHub tutorial](https://skills.github.com).
+## How File Renaming Works
 
-If you found any bug or have some questions, use [issues tab](https://github.com/impresscms-dev/flattern-markdown-folder-structure-action/issues) and write there your questions.
+When flattening the directory structure, the action:
+
+1. Moves all files to the root directory
+2. If filename conflicts occur, the action renames files by adding the original folder path in parentheses
+   - Example: `subfolder/document.md` becomes `document (subfolder).md`
+3. Updates all internal Markdown links to maintain proper references between documents
+
+## Examples
+
+### Before Flattening
+```
+docs/
+├── README.md
+├── getting-started.md
+├── api/
+│   ├── endpoints.md
+│   └── authentication.md
+└── guides/
+    ├── installation.md
+    └── configuration.md
+```
+
+### After Flattening
+```
+docs/
+├── README.md
+├── getting-started.md
+├── endpoints (api).md
+├── authentication (api).md
+├── installation (guides).md
+└── configuration (guides).md
+```
+
+## How to Contribute
+
+If you want to add functionality or fix bugs, you can fork the repository, make your changes, and create a pull request. If you're not sure how this works, check out GitHub's [fork a repo](https://docs.github.com/en/get-started/quickstart/fork-a-repo) and [creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) guides.
+
+If you find a bug or have questions, please use the [issues tab](https://github.com/impresscms-dev/flattern-markdown-folder-structure-action/issues) to report them.
