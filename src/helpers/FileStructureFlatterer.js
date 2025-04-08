@@ -7,11 +7,17 @@ import UnsupportedFilesystemItemError from '../errors/UnsupportedFilesystemItemE
  * Class to flatten file structure with markdown data
  */
 export default class FileStructureFlatterer {
+
   /**
-   * @param {object} fs - Filesystem module
+   * @type {import('fs')}
+   */
+  #fs
+
+  /**
+   * @param {import('fs')} fs - Filesystem module
    */
   constructor(fs) {
-    this._fs = fs
+    this.#fs = fs
   }
 
   /**
@@ -46,12 +52,12 @@ export default class FileStructureFlatterer {
     const dirs = ['.']
     while (dirs.length > 0) {
       const dir = dirs.pop()
-      const contents = this._fs.readdirSync(`${path}/${dir}`)
+      const contents = this.#fs.readdirSync(`${path}/${dir}`)
 
       for (const item of contents) {
         const relativePath = `${dir}/${item.toString()}`
         const fullPath = `${path}/${relativePath}`
-        const info = this._fs.lstatSync(fullPath)
+        const info = this.#fs.lstatSync(fullPath)
         if (info.isDirectory()) {
           dirs.push(relativePath)
           continue
@@ -111,7 +117,7 @@ export default class FileStructureFlatterer {
     if (isDebug()) {
       debug(` Fixing ${filename}...`)
     }
-    const content = this._fs.readFileSync(filename, 'utf8')
+    const content = this.#fs.readFileSync(filename, 'utf8')
     const allPossibleFilenames = {}
     for (const oldFilename in filenames) {
       const currentFilename = filenames[oldFilename]
@@ -154,7 +160,7 @@ export default class FileStructureFlatterer {
       if (isDebug()) {
         debug('  Changed.')
       }
-      this._fs.writeFileSync(filename, newContent)
+      this.#fs.writeFileSync(filename, newContent)
     }
   }
 
@@ -200,7 +206,7 @@ export default class FileStructureFlatterer {
     if (isDebug()) {
       debug(` Renaming ${oldFilename} -> ${newFilename}...`)
     }
-    this._fs.renameSync(
+    this.#fs.renameSync(
       newDocs.concat('/', oldFilename),
       newDocs.concat('/', newFilename)
     )

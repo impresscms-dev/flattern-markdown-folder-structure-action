@@ -71,14 +71,14 @@ class ExecutionHandler {
   }
 
   /**
-   * Sufixes file extension if running on windows
+   * Suffixes file extension if running on windows
    *
    * @param {string} filename Filename for witch add extension
    * @param {string} winExt Extension to add
    * @return {string} Filename with extension if on Windows
    */
   suffixExtIfRunningOnWindows(filename, winExt = 'bat') {
-    return this.isRunningOnWindows() ? filename.concat('.', winExt) : filename
+    return this.isRunningOnWindows() ? `${filename}.${winExt}` : filename
   }
 }
 
