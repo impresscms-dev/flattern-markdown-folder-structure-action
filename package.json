@@ -2,20 +2,20 @@
   "name": "flattern-markdown-folder-structure-action",
   "version": "1.1.0",
   "description": "GitHub action to flatten file structure with markdown data",
-  "main": "src/index.ts",
+  "main": "src/index.js",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git@github.com:impresscms-dev/flattern-markdown-folder-structure-action.git"
   },
   "scripts": {
-    "test": "jest",
-    "build": "tsc",
-    "format": "prettier --write **/*.ts",
-    "format-check": "prettier --check **/*.ts",
-    "lint": "eslint src/**/*.ts",
-    "pack": "ncc build --minify",
-    "all": "npm install && npm run build && npm run format && npm run lint && npm run pack",
-    "fast-all": "npm install && npm run build && npm run pack"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "format": "prettier --write **/*.js tests/**/*.js",
+    "format-check": "prettier --check **/*.js tests/**/*.js",
+    "lint": "eslint src/**/*.js tests/**/*.js",
+    "pack": "ncc build src/index.js --minify",
+    "all": "npm install && npm run format && npm run lint && npm run pack",
+    "fast-all": "npm install && npm run pack"
   },
   "keywords": [
     "github actions",
@@ -32,19 +32,13 @@
     "@actions/github": "^6.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^29.4.0",
-    "@types/node": "^22.0.2",
-    "@typescript-eslint/eslint-plugin": "^7.4",
-    "@typescript-eslint/parser": "^7.4",
     "@vercel/ncc": "^0.38.0",
-    "eslint": "^8.33.0",
+    "eslint": "^9.0.0",
     "eslint-plugin-github": "^6.0.0",
     "eslint-plugin-jest": "^28.3.0",
     "jest": "^29.4.2",
     "memfs": "^4.2.0",
     "prettier": "^3.0.0",
-    "semver": "^7.3.8",
-    "ts-jest": "^29.0.5",
-    "typescript": "^5.0.3"
+    "semver": "^7.3.8"
   }
 }

@@ -1,5 +1,5 @@
 import {createFsFromVolume, Volume} from 'memfs'
-import FileStructureFlatterer from '../src/helpers/FileStructureFlatterer'
+import FileStructureFlatterer from '../src/helpers/FileStructureFlatterer.js'
 
 process.env['RUNNER_DEBUG'] = '0'
 
