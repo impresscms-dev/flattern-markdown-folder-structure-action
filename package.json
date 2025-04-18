@@ -1,6 +1,5 @@
 {
   "name": "flattern-markdown-folder-structure-action",
-  "version": "1.1.0",
   "description": "GitHub action to flatten file structure with markdown data",
   "main": "src/index.js",
   "type": "module",
@@ -12,7 +11,7 @@
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "format": "prettier --write **/*.js tests/**/*.js",
     "format-check": "prettier --check **/*.js tests/**/*.js",
-    "lint": "eslint src/**/*.js tests/**/*.js",
+    "lint": "eslint --no-warn-ignored 'src/**/*.js' 'tests/**/*.js'",
     "pack": "ncc build src/index.js --minify",
     "all": "npm install && npm run format && npm run lint && npm run pack",
     "fast-all": "npm install && npm run pack"
