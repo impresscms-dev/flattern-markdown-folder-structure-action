@@ -18,7 +18,7 @@ jobs:
       github.event.workflow_run.conclusion == 'success' &&
       github.actor == 'dependabot[bot]'
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     steps:
       - name: "Approve pull request"
